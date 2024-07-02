@@ -1,0 +1,76 @@
+
+--Opens information from crime scene report
+SELECT *
+FROM crime_scene_report
+WHERE type = 'murder' AND city = 'SQL City' AND date = 20180115;
+
+--Identifies witnesses
+SELECT id, name, address_street_name, address_number
+FROM person
+WHERE (name LIKE 'Annabel%' AND address_street_name = 'Franklin Ave')
+OR address_street_name = 'Northwestern Dr'
+GROUP BY address_street_name
+HAVING max(address_number);
+
+--Identifies Annabel's ID
+SELECT person_id, name
+FROM get_fit_now_member
+WHERE name LIKE 'Annabel%' OR name LIKE 'Morty%';
+
+--Identifies Morty's person ID
+SELECT person_id
+FROM facebook_event_checkin JOIN person
+ON person.id = facebook_event_checkin.person_id
+WHERE person.name LIKE 'Morty%';
+
+--Opens interview transcript for Annabel (16371) and Morty (14887)
+SELECT transcript from interview
+WHERE person_id = 16371 OR person_id = 14887;
+
+
+/**
+Interview transcripts:
+I heard a gunshot and then saw a man run out. He had a "Get Fit Now Gym" bag. The membership number on the bag started with "48Z". Only gold members have those bags. The man got into a car with a plate that included "H42W".
+I saw the murder happen, and I recognized the killer from my gym when I was working out last week on January the 9th.
+**/
+
+
+--Identifies gym membership ID and name of people who match witness testimony
+SELECT id, person_id, name
+FROM get_fit_now_member JOIN get_fit_now_check_in
+ON get_fit_now_member.id = get_fit_now_check_in.membership_id
+WHERE check_in_date = 20180109 AND membership_id LIKE '48Z%';
+
+--Identifies owner of car from testimony
+SELECT drivers_license.id, plate_number, person.name
+FROM drivers_license JOIN person
+ON drivers_license.id = person.license_id
+WHERE plate_number LIKE '%H42W%'
+AND (person.name LIKE 'Jeremy%' OR 'Joe%');
+
+--Identifies Jeremy Bowers' person ID
+SELECT person.id FROM person
+JOIN get_fit_now_member ON person.name =
+get_fit_now_member.name
+WHERE person.name LIKE 'Jeremy Bowers';
+
+--Opens Jeremy Bowers' interview transcript
+SELECT transcript FROM interview
+WHERE person_id = 67318;
+
+
+/**
+Interview information:
+Woman around 5'5" (65") or 5'7 (67"), red hair, Tesla Model S, attended SQL Symphony Concert 3 times in December 2017.
+**/
+
+--Identifies people who match witness testimony
+SELECT person.name, height, hair_color, car_make, car_model FROM drivers_license
+JOIN person
+ON person.license_id = drivers_license.id
+JOIN facebook_event_checkin
+ON person.id = facebook_event_checkin.person_id
+WHERE hair_color LIKE 'red'
+AND car_make LIKE 'Tesla'
+AND car_model LIKE 'Model S'
+AND height BETWEEN 65 AND 67;
